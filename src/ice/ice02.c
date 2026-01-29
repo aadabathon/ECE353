@@ -12,6 +12,8 @@
 
 #if defined(ICE02)
 #include "drivers.h"
+#include "ece353-pins.h"
+#include "lcd-io.h"
 
 char APP_DESCRIPTION[] = "ECE353: ICE 02 - LCD 8080 Driver";
 
@@ -49,7 +51,17 @@ void app_init_hw(void)
     printf("* Name:%s\n\r", NAME);
     printf("**************************************************\n\r");
 
+    rslt = lcd_initialize();
+    if (rslt != CY_RSLT_SUCCESS)
+    {
+        printf("lcd_initialize failed: %ld\n\r", (long)rslt);
+        while(1) {}
+    }
+
+    lcd_clear_screen(LCD_COLOR_BLACK);
+
 }
+
 
 /*****************************************************************************/
 /* Application Code                                                          */
@@ -60,9 +72,21 @@ void app_init_hw(void)
  */
 void app_main(void)
 {
-    
+    uint8_t minutes = 0;
+    uint8_t seconds = 0;
+
+    lcd_draw_time(minutes, seconds);
+
     while(1)
     {
+        Cy_SysLib_Delay(1000);
+
+        seconds++;
+        if (seconds >= 60) { seconds = 0; minutes++; }
+        if (minutes >= 100) { minutes = 0; }
+
+        lcd_draw_time(minutes, seconds);
     }
 }
+
 #endif

@@ -9,6 +9,7 @@
  * 
  */
 #include "lcd-io.h"
+#include "ece353-pins.h"
 
 /*******************************************************************************
 * Function Name: lcd_write_cmd_u8
@@ -20,6 +21,16 @@
 *******************************************************************************/
 __STATIC_INLINE void lcd_write_cmd_u8(uint8_t DL)
 {
+  PORT_IO_LCD_CMD->OUT_CLR = MASK_IO_LCD_CSX;   // select
+  PORT_IO_LCD_CMD->OUT_CLR = MASK_IO_LCD_DCX;   // command
+
+  PORT_IO_LCD_DATA->OUT_CLR = MASK_IO_LCD_DATA;
+  PORT_IO_LCD_DATA->OUT_SET = (((uint32_t)DL << SHIFT_IO_LCD_DATA) & MASK_IO_LCD_DATA);
+
+  PORT_IO_LCD_CMD->OUT_CLR = MASK_IO_LCD_WRX;   // strobe
+  PORT_IO_LCD_CMD->OUT_SET = MASK_IO_LCD_WRX;
+
+  PORT_IO_LCD_CMD->OUT_SET = MASK_IO_LCD_CSX;   // deselect
 }
 
 /*******************************************************************************
@@ -31,6 +42,16 @@ __STATIC_INLINE void lcd_write_cmd_u8(uint8_t DL)
 *******************************************************************************/
 __STATIC_INLINE void  lcd_write_data_u8 (uint8_t x)
 {
+  PORT_IO_LCD_CMD->OUT_CLR = MASK_IO_LCD_CSX;   // select
+  PORT_IO_LCD_CMD->OUT_SET = MASK_IO_LCD_DCX;   // data
+
+  PORT_IO_LCD_DATA->OUT_CLR = MASK_IO_LCD_DATA;
+  PORT_IO_LCD_DATA->OUT_SET = (((uint32_t)x << SHIFT_IO_LCD_DATA) & MASK_IO_LCD_DATA);
+
+  PORT_IO_LCD_CMD->OUT_CLR = MASK_IO_LCD_WRX;   // strobe
+  PORT_IO_LCD_CMD->OUT_SET = MASK_IO_LCD_WRX;
+
+  PORT_IO_LCD_CMD->OUT_SET = MASK_IO_LCD_CSX;   // deselect
 }
 
 /*******************************************************************************
@@ -43,6 +64,23 @@ __STATIC_INLINE void  lcd_write_data_u8 (uint8_t x)
 //write  data word
 __STATIC_INLINE void  lcd_write_data_u16(uint16_t y)
 {
+  uint8_t hi = (uint8_t)(y >> 8);
+  uint8_t lo = (uint8_t)(y & 0xFF);
+
+  PORT_IO_LCD_CMD->OUT_CLR = MASK_IO_LCD_CSX;   // select
+  PORT_IO_LCD_CMD->OUT_SET = MASK_IO_LCD_DCX;   // data
+
+  PORT_IO_LCD_DATA->OUT_CLR = MASK_IO_LCD_DATA;
+  PORT_IO_LCD_DATA->OUT_SET = (((uint32_t)hi << SHIFT_IO_LCD_DATA) & MASK_IO_LCD_DATA);
+  PORT_IO_LCD_CMD->OUT_CLR = MASK_IO_LCD_WRX;
+  PORT_IO_LCD_CMD->OUT_SET = MASK_IO_LCD_WRX;
+
+  PORT_IO_LCD_DATA->OUT_CLR = MASK_IO_LCD_DATA;
+  PORT_IO_LCD_DATA->OUT_SET = (((uint32_t)lo << SHIFT_IO_LCD_DATA) & MASK_IO_LCD_DATA);
+  PORT_IO_LCD_CMD->OUT_CLR = MASK_IO_LCD_WRX;
+  PORT_IO_LCD_CMD->OUT_SET = MASK_IO_LCD_WRX;
+
+  PORT_IO_LCD_CMD->OUT_SET = MASK_IO_LCD_CSX;   // deselect
 }
 
 /*******************************************************************************
@@ -421,9 +459,22 @@ void lcd_config_screen(void)
 *******************************************************************************/
 cy_rslt_t lcd_config_gpio(void)
 {
-  cy_rslt_t rslt = CY_RSLT_SUCCESS;
+    cy_rslt_t rslt = CY_RSLT_SUCCESS;
 
-  return rslt;
+    rslt |= cyhal_gpio_init(LCD_WRX, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, 1);
+    rslt |= cyhal_gpio_init(LCD_DCX, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, 1);
+    rslt |= cyhal_gpio_init(LCD_CSX, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, 1);
+
+    rslt |= cyhal_gpio_init(LCD_D0,  CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, 0);
+    rslt |= cyhal_gpio_init(LCD_D1,  CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, 0);
+    rslt |= cyhal_gpio_init(LCD_D2,  CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, 0);
+    rslt |= cyhal_gpio_init(LCD_D3,  CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, 0);
+    rslt |= cyhal_gpio_init(LCD_D4,  CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, 0);
+    rslt |= cyhal_gpio_init(LCD_D5,  CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, 0);
+    rslt |= cyhal_gpio_init(LCD_D6,  CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, 0);
+    rslt |= cyhal_gpio_init(LCD_D7,  CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, 0);
+
+    return rslt;
 }
 
 /*******************************************************************************

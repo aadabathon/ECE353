@@ -112,6 +112,20 @@
 #define LCD_CMD_DIGITAL_GAMMA_CONTROL_2         0xE3
 #define LCD_CMD_INTERFACE_CONTROL               0xF6
 
+//Macros for ICE02::
+
+// Control port (WRX/DCX/CSX all on same port)
+#define PORT_IO_LCD_CMD   GPIO_PRT1
+#define MASK_IO_LCD_WRX   (1u << 2)
+#define MASK_IO_LCD_DCX   (1u << 1)
+#define MASK_IO_LCD_CSX   (1u << 0)
+
+// Data bus port (D0..D7 contiguous)
+#define PORT_IO_LCD_DATA  GPIO_PRT2
+#define SHIFT_IO_LCD_DATA 0u
+#define MASK_IO_LCD_DATA  (0xFFu << SHIFT_IO_LCD_DATA)
+
+
 typedef struct {
     uint8_t x;            // X coordinate
     uint8_t y;            // Y coordinate
