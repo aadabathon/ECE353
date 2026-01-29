@@ -38,6 +38,8 @@ char APP_DESCRIPTION[] = "ECE353: ICE 01 - Memory Mapped IO - GPIO";
  */
 void app_init_hw(void)
 {
+    buttons_init_gpio();
+    leds_init_gpio();
     console_init();
     printf("\x1b[2J\x1b[;H");
     printf("**************************************************\n\r");
@@ -58,13 +60,47 @@ void app_init_hw(void)
  */
 void app_main(void)
 {
-
-    while(1)
+    while (1)
     {
+        button_state_t sw1 = buttons_get_state(BUTTON_SW1);
+        button_state_t sw2 = buttons_get_state(BUTTON_SW2);
+        button_state_t sw3 = buttons_get_state(BUTTON_SW3);
 
-        /* Sleep for 50mS */
+        if (sw1 == BUTTON_STATE_FALLING_EDGE)
+        {
+            printf("SW1 pressed\n");
+            leds_set_state(LED_RED, LED_ON);
+        }
+        else if (sw1 == BUTTON_STATE_RISING_EDGE)
+        {
+            printf("SW1 released\n");
+            leds_set_state(LED_RED, LED_OFF);
+        }
+
+        if (sw2 == BUTTON_STATE_FALLING_EDGE)
+        {
+            printf("SW2 pressed\n");
+            leds_set_state(LED_GREEN, LED_ON);
+        }
+        else if (sw2 == BUTTON_STATE_RISING_EDGE)
+        {
+            printf("SW2 released\n");
+            leds_set_state(LED_GREEN, LED_OFF);
+        }
+
+        if (sw3 == BUTTON_STATE_FALLING_EDGE)
+        {
+            printf("SW3 pressed\n");
+            leds_set_state(LED_BLUE, LED_ON);
+        }
+        else if (sw3 == BUTTON_STATE_RISING_EDGE)
+        {
+            printf("SW3 released\n");
+            leds_set_state(LED_BLUE, LED_OFF);
+        }
+
         cyhal_system_delay_ms(50);
-
     }
 }
+
 #endif
