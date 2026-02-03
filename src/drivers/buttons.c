@@ -15,7 +15,23 @@
  // gpio intitialization is usually as follows:
  // cyhal_gpio_init(pin, direction, drive_mode, initial_value);
 
+ ////////////////////////////////////////////////
+ //ICE-03 stuff
+static cyhal_timer_t ICE3_timerObj;
+static cyhal_timer_cfg_t ICE3_timerCfg;
 
+static void Ice3_timer_handler(void *callback_arg, cyhal_timer_event_t event);
+
+cy_rslt_t buttons_init_timer(void)
+{
+    cy_rslt_t rslt = timer_init(&ICE3_timerObj, &ICE3_timerCfg, 500000u, (void*)Ice3_timer_handler);
+    if (rslt != CY_RSLT_SUCCESS) return rslt;
+    return cyhal_timer_start(&ICE3_timerObj);
+}
+
+
+/////////////////////////////////////////////////
+//Ice-01
 cy_rslt_t buttons_init_gpio(void)
 {
     cyhal_gpio_init(PIN_BUTTON_SW1, CYHAL_GPIO_DIR_INPUT,
@@ -60,3 +76,4 @@ button_state_t buttons_get_state(ece353_button_t button)
     prev_state[button] = curr_state;
     return result;
 }
+////////////////////////////////////////////
