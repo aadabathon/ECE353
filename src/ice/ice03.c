@@ -19,7 +19,15 @@ char APP_DESCRIPTION[] = "ECE353: ICE 03 - Timer Interrupts/Debounce Buttons";
 /*****************************************************************************/
 /* Macros                                                                    */
 /*****************************************************************************/
+// Replace these with your actual pin macros
+#define PIN_LED_R  PIN_LED_RED
+#define PIN_LED_G  PIN_LED_GRN
+#define PIN_LED_B  PIN_LED_BLU
 
+// Most PSoC6 kits use ACTIVE-LOW LEDs (0 = ON, 1 = OFF).
+// If yours is active-high, flip the mapping.
+#define LED_ON   (0u)
+#define LED_OFF  (1u)
 /*****************************************************************************/
 /* Global Variables                                                          */
 /*****************************************************************************/
@@ -31,6 +39,17 @@ char APP_DESCRIPTION[] = "ECE353: ICE 03 - Timer Interrupts/Debounce Buttons";
 /*****************************************************************************/
 /* Function Definitions                                                      */
 /*****************************************************************************/
+
+
+
+static inline void set_rgb(uint8_t r, uint8_t g, uint8_t b)
+{
+    cyhal_gpio_write(PIN_LED_RED, r ? LED_ON : LED_OFF);
+    cyhal_gpio_write(PIN_LED_GREEN, g ? LED_ON : LED_OFF);
+    cyhal_gpio_write(PIN_LED_BLUE, b ? LED_ON : LED_OFF);
+}
+
+#include "cyhal_gpio.h"
 
 /**
  * @brief

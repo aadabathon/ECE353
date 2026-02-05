@@ -30,6 +30,6 @@
  * @param Handler 
  * Function pointer the the Timer ISR (Callback)
  */
-cy_rslt_t timer_init(cyhal_timer_t *timer_obj, cyhal_timer_cfg_t *timer_cfg, uint32_t ticks, void *Handler);
+cy_rslt_t timer_init(cyhal_timer_t *timer_obj, cyhal_timer_cfg_t *timer_cfg, uint32_t ticks, cyhal_timer_event_callback_t Handler);
 
 #endif

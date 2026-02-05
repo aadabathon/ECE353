@@ -15,6 +15,15 @@
 #include "cybsp.h"
 #include "cyhal_gpio.h"
 #include "ece353-pins.h"
+#include "cyhal_pwm.h"
+
+cy_rslt_t leds_pwm_init(
+    cyhal_pwm_t *pwm_obj_red,
+    cyhal_pwm_t *pwm_obj_green,
+    cyhal_pwm_t *pwm_obj_blue
+);
+   
+
 
 //enum
 typedef enum {

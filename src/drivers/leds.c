@@ -61,3 +61,34 @@ void leds_set_state(ece353_led_t led, ece353_led_state_t state)
     }
 }
 
+cy_rslt_t leds_pwm_init( 
+    cyhal_pwm_t *pwm_obj_red,
+    cyhal_pwm_t *pwm_obj_green,
+    cyhal_pwm_t *pwm_obj_blue
+)
+{
+    cy_rslt_t rslt;
+
+    // Initialize PWM for Red LED
+    rslt = cyhal_pwm_init(pwm_obj_red, PIN_LED_RED, NULL);
+    if (rslt != CY_RSLT_SUCCESS)
+    {
+        return rslt;
+    }
+
+    // Initialize PWM for Green LED
+    rslt = cyhal_pwm_init(pwm_obj_green, PIN_LED_GREEN, NULL);
+    if (rslt != CY_RSLT_SUCCESS)
+    {
+        return rslt;
+    }
+
+    // Initialize PWM for Blue LED
+    rslt = cyhal_pwm_init(pwm_obj_blue, PIN_LED_BLUE, NULL);
+    if (rslt != CY_RSLT_SUCCESS)
+    {
+        return rslt;
+    }
+
+    return CY_RSLT_SUCCESS;
+}
