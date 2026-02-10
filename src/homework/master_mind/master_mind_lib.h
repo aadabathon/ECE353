@@ -15,6 +15,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+
+
 /********************************************************************************/
 /* Macros used to define the geometry and location of objects                   */
 /********************************************************************************/
@@ -225,3 +227,11 @@ static inline bool lcd_tile_rect(lcd_rect_t *r, lcd_row_t row, uint8_t col)
 bool master_mind_handle_msg(lcd_msg_t* msg);
 
 #endif // __MASTER_MIND_H__
+
+/********************************************************************************/
+/* Helper Function Declarations for master_mind function (Adam S.)              */
+/********************************************************************************/
+
+bool lcd_draw_tile(lcd_tile_t* tile);
+bool lcd_draw_tile_inverted(lcd_tile_t* tile);
+bool lcd_print_message(char* message);
