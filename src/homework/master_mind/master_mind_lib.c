@@ -49,11 +49,12 @@ bool lcd_draw_tile(lcd_tile_t* tile){
     char c = tile->number + '0'; // Convert the number in the tile struct to a character by adding '0' to it
     uint16_t index = c - '0'; // Calculate the index of the character in the font bitmap by subtracting the start character from the character
     
-    FONT_CHAR_INFO char_info = FONT_CHAR_INFO_LARGE_NUMBERS[index]; // Get the character information from the font info struct using the index
+    FONT_CHAR_INFO char_info = FONT_CHAR_INFO_LARGE_NUMBERS[tile->number]; // Get the character information from the font info struct using the index
     const uint8_t *bitmap = FONT_NUM_LARGE_BITMAPS + char_info.offset;
     lcd_draw_image(rect.cx, rect.cy, char_info.width, char_info.height,
     bitmap, tile->color_fg, tile->color_bg, true); // Draw the background color for the tile and return the result
     //}
+    
     return true;
 }
 
@@ -71,7 +72,7 @@ bool lcd_draw_tile_inverted(lcd_tile_t* tile){
     if(!lcd_tile_rect(&rect, tile->row, tile->col)){ // Check if the tile rect is valid, return false if not
         return false;
     }
-    lcd_draw_rectangle(rect.cx, rect.cy, rect.w, rect.h, tile->color_bg, true); // Draw the filled rectangle for the tile and return the result
+    lcd_draw_rectangle(rect.cx, rect.cy, rect.w, rect.h, tile->color_fg, true); // Draw the filled rectangle for the tile and return the result
     //if (tile->row != LCD_TILE_ROW_CYPHER)
     //{ 
     if(tile->number > 7){ // Check for valid number for code tiles, return false if invalid
@@ -80,11 +81,12 @@ bool lcd_draw_tile_inverted(lcd_tile_t* tile){
     char c = tile->number + '0'; // Convert the number in the tile struct to a character by adding '0' to it
     uint16_t index = c - '0'; // Calculate the index of the character in the font bitmap by subtracting the start character from the character
     
-    FONT_CHAR_INFO char_info = FONT_CHAR_INFO_LARGE_NUMBERS[index]; // Get the character information from the font info struct using the index
+    FONT_CHAR_INFO char_info = FONT_CHAR_INFO_LARGE_NUMBERS[tile->number]; // Get the character information from the font info struct using the index
     const uint8_t *bitmap = FONT_NUM_LARGE_BITMAPS + char_info.offset;
     lcd_draw_image(rect.cx, rect.cy, char_info.width, char_info.height,
     bitmap, tile->color_bg, tile->color_fg, true); // Draw the background color for the tile and return the result
     //}// //note that this helper function differs from lcd_draw_tile in that the foreground and background colors are swapped in our draw_image() call
+    
     return true;
 };
 /**
@@ -118,7 +120,7 @@ bool lcd_print_message(char* message){
         );
         x += char_info.width; // Move the x coordinate to the right for the next character
     } 
-    
+    return true;
 }
 
 //====================================================================================================
