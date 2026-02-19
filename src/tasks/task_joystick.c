@@ -15,7 +15,7 @@
 #include "drivers.h"
  #include "task_joystick.h"
 
- QueueHandle_t Queue_Joystick = NULL;
+QueueHandle_t Queue_Joystick = NULL;
 
 /* Message lookup table for joystick positions */
 const char * const joystick_pos_names[] = {
@@ -35,21 +35,42 @@ const char * const joystick_pos_names[] = {
   *  Task used to monitor the joystick
   * @param arg 
   */
- void task_joystick(void *arg)
+void task_joystick(void *arg)
 {
-    (void)arg; // Unused parameter
-    while(1)
+    (void)arg;
+
+    joystick_position_t prev = JOYSTICK_POS_CENTER;   
+    TickType_t last_wake = xTaskGetTickCount();
+
+    for (;;)
     {
+        joystick_position_t cur = joystick_get_pos();
+
+        if (cur != prev)
+        {
+            // Queue length is 1 → overwrite is perfect 
+            xQueueOverwrite(Queue_Joystick, &cur);
+            prev = cur;
+        }
+
+        vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(500));
     }
 }
 
-
 bool task_joystick_init(void)
 {
-    /* Create the Queue used to send Joystick Positions*/
+    Queue_Joystick = xQueueCreate(1, sizeof(joystick_position_t));
+    if (Queue_Joystick == NULL) return false;
 
-    /* Create the joystick task */
-    
-    return true;
+    BaseType_t ok = xTaskCreate(
+        task_joystick,
+        "Joystick",
+        configMINIMAL_STACK_SIZE + 256,
+        NULL,
+        2,
+        NULL
+    );
+
+    return (ok == pdPASS);
 }
 #endif

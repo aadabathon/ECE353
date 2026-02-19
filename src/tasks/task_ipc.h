@@ -23,6 +23,8 @@
 #include "portmacro.h"
 #include "rtos_events.h"
 
+#define PIN_IPC_TX  NC
+#define PIN_IPC_RX  NC
 #define IPC_TX_CIRCULAR_BUFFER_SIZE 128
 #define IPC_TX_QUEUE_LENGTH 10
 

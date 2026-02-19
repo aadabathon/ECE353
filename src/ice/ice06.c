@@ -24,6 +24,11 @@ char APP_DESCRIPTION[] = "ECE353: ICE 06 - FreeRTOS Queues";
 /* Global Variables                                                          */
 /*****************************************************************************/
 /* Create a lookup table to print out the joystick positions*/
+static const char * const joystick_pos_names[] = {
+  "Center","Left","Right","Up","Down","Upper Left","Upper Right","Lower Left","Lower Right"
+};
+
+
 const char *Joystick_Pos_Strings[] = {
     [JOYSTICK_POS_CENTER] = "Center",
     [JOYSTICK_POS_LEFT] = "Left",
@@ -65,8 +70,26 @@ void app_init_hw(void)
 
 void task_print_directions(void *arg)
 {
+    (void)arg;
 
+    for (;;)
+    {
+        joystick_position_t pos;
+
+        if (xQueueReceive(Queue_Joystick, &pos, portMAX_DELAY) == pdPASS)
+        {
+            if ((uint32_t)pos < (sizeof(joystick_pos_names)/sizeof(joystick_pos_names[0])))
+            {
+                printf("Joystick Position Changed: %s\n\r", joystick_pos_names[pos]);
+            }
+            else
+            {
+                printf("Joystick Position Changed: <invalid>\n\r");
+            }
+        }
+    }
 }
+
 
 /*****************************************************************************/
 /* Application Code                                                          */
@@ -78,15 +101,27 @@ void task_print_directions(void *arg)
 void app_main(void)
 {
     /* Initialize joystick resources */
-    
-    /* Register the tasks with FreeRTOS*/
+    joystick_init();
 
-    /* Start the scheduler*/
+    /* Register the tasks with FreeRTOS */
+    if (!task_joystick_init())
+    {
+        while (1) {} // failed to create queue/task
+    }
+
+    xTaskCreate(
+        task_print_directions,
+        "PrintJoy",
+        configMINIMAL_STACK_SIZE + 256,
+        NULL,
+        1,
+        NULL
+    );
+
+    /* Start the scheduler */
     vTaskStartScheduler();
 
-    /* Will never reach this loop once the scheduler starts */
-    while (1)
-    {
-    }
+    while (1) {}
 }
+
 #endif
