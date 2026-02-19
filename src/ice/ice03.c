@@ -86,7 +86,7 @@ typedef enum {
     STATE_SW3_DET,
 } ice03_state_t;
 
-void main_app(void)
+void app_main(void)
 {
     ice03_state_t current_state = STATE_INIT;
 
