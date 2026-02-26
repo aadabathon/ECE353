@@ -16,6 +16,7 @@
 #include "task_buttons.h"
 #include "task_lcd.h"
 #include "task_joystick.h"
+#include "buttons.h"
 
 char APP_DESCRIPTION[] = "ECE353: ICE 08 - FreeRTOS LCD Gatekeeper";
 
@@ -26,6 +27,9 @@ char APP_DESCRIPTION[] = "ECE353: ICE 08 - FreeRTOS LCD Gatekeeper";
 /*****************************************************************************/
 /* Global Variables                                                          */
 /*****************************************************************************/
+/* ADD CODE */
+/* FreeRTOS Queue for LCD messages */
+QueueHandle_t Queue_LCD_Request = NULL;
 
 /*****************************************************************************/
 /* Function Declarations                                                     */
@@ -34,14 +38,83 @@ char APP_DESCRIPTION[] = "ECE353: ICE 08 - FreeRTOS LCD Gatekeeper";
 /*****************************************************************************/
 /* Function Definitions                                                      */
 /*****************************************************************************/
-void task_system_control(void *pvParameters)
+void task_sw1(void *pvParameters)
 {
-    (void)pvParameters; // Unused parameter
+    (void)pvParameters;
 
-    while(1)
+    printf("Starting Task SW1\n\r");
+
+    uint32_t button_count = 0;
+    TickType_t t_pressed = 0;
+    bool was_pressed = false;
+    bool reported = false;
+
+    while (1)
     {
-        // Sleep for 100 ms
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(25));
+
+        bool pressed = (buttons_get_state(BUTTON_SW1) == BUTTON_STATE_HIGH);
+        TickType_t now = xTaskGetTickCount();
+
+        if (pressed && !was_pressed)
+        {
+            t_pressed = now;
+            reported = false;
+        }
+
+        if (pressed && !reported && (now - t_pressed) >= pdMS_TO_TICKS(1000))
+        {
+            button_count++;
+
+            lcd_msg_request_t lcd_request;
+            lcd_request.msg.command = LCD_CMD_PRINT_SW1_COUNT;
+            snprintf(lcd_request.msg.payload.message, 32, "SW1 %lu", (unsigned long)button_count);
+            xQueueSend(Queue_LCD_Request, &lcd_request, 0);
+            
+            reported = true;
+        }
+
+        was_pressed = pressed;
+    }
+}
+
+void task_sw2(void *pvParameters)
+{
+    (void)pvParameters;
+
+    printf("Starting Task SW2\n\r");
+
+    uint32_t button_count = 0;
+    TickType_t t_pressed = 0;
+    bool was_pressed = false;
+    bool reported = false;
+
+    while (1)
+    {
+        vTaskDelay(pdMS_TO_TICKS(25));
+
+        bool pressed = (buttons_get_state(BUTTON_SW2) == BUTTON_STATE_HIGH);
+        TickType_t now = xTaskGetTickCount();
+
+        if (pressed && !was_pressed)
+        {
+            t_pressed = now;
+            reported = false;
+        }
+
+        if (pressed && !reported && (now - t_pressed) >= pdMS_TO_TICKS(1000))
+        {
+            button_count++;
+
+            lcd_msg_request_t lcd_request;
+            lcd_request.msg.command = LCD_CMD_PRINT_SW2_COUNT;
+            snprintf(lcd_request.msg.payload.message, 32, "SW2 %lu", (unsigned long)button_count);
+            xQueueSend(Queue_LCD_Request, &lcd_request, 0);
+
+            reported = true;
+        }
+
+        was_pressed = pressed;
     }
 }
 
@@ -69,6 +142,15 @@ void app_init_hw(void)
         for(int i = 0; i < 100000; i++) {}
         CY_ASSERT(0);
     }
+
+    rslt = buttons_init_gpio();
+    if (rslt != CY_RSLT_SUCCESS)
+    {
+        printf("Buttons initialization failed!\n\r");
+        for(int i = 0; i < 100000; i++) {}
+        CY_ASSERT(0);
+    }
+
 }
 
 /*****************************************************************************/
@@ -85,28 +167,25 @@ void app_main(void)
 
     ECE353_RTOS_Events = xEventGroupCreate();
 
-    /* Initialize LCD resources */
-    if (!task_lcd_init())
-    {
-        printf("Failed to initialize joystick task\n\r");
-        for(int i = 0; i < 100000; i++) {}
-       CY_ASSERT(0); // If the task initialization fails, assert
-    }
+    /* Create the LCD Request Queue*/
+    /* ADD CODE */
 
-    /* Start the buttons task*/
+    /* Initialize the LCD task */
+    /* ADD CODE */
+
     xTaskCreate(
-        task_buttons, 
-        "Task Buttons", 
-        configMINIMAL_STACK_SIZE, 
+        task_sw1, 
+        "Task SW1", 
+        configMINIMAL_STACK_SIZE*2, 
         NULL, 
         tskIDLE_PRIORITY + 1, 
         NULL
     );
 
     xTaskCreate(
-        task_system_control, 
-        "Task System Control", 
-        configMINIMAL_STACK_SIZE*5, 
+        task_sw2, 
+        "Task SW2", 
+        configMINIMAL_STACK_SIZE*2, 
         NULL, 
         tskIDLE_PRIORITY + 1, 
         NULL

@@ -85,6 +85,8 @@ typedef enum {
     LCD_CMD_DRAW_TILE_INVERTED,      // Highlight exactly one box
     LCD_CMD_PRINT_MESSAGE,          // Print status/instruction text
     LCD_CMD_CLEAR_SCREEN,           // Optional: clear whole screen
+    LCD_CMD_PRINT_SW1_COUNT,         // Optional: print the current count of SW1 presses
+    LCD_CMD_PRINT_SW2_COUNT       // Optional: print the current count of SW2 presses
 } lcd_command_t;
 
 

@@ -27,6 +27,24 @@ void task_lcd(void *pvParameters)
 
     while(1)
     {
+        if (xQueueReceive(Queue_Requests, &lcd_request, portMAX_DELAY) == pdPASS)
+        {
+            switch (lcd_request.msg.command)
+            {
+                case LCD_CMD_PRINT_SW1_COUNT:
+                    printf("%s\r\n", lcd_request.msg.payload.message);
+                    lcd_draw_image(lcd_request.msg.payload.message); 
+                    break;
+
+                case LCD_CMD_PRINT_SW2_COUNT:
+                    printf("%s\r\n", lcd_request.msg.payload.message);
+                    lcd_print_message(lcd_request.msg.payload.message);    
+                   break;
+                    
+                default:
+                    break;
+            }
+        }
     }
 }
 
