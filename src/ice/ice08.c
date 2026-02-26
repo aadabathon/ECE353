@@ -30,7 +30,7 @@ char APP_DESCRIPTION[] = "ECE353: ICE 08 - FreeRTOS LCD Gatekeeper";
 /* ADD CODE */
 /* FreeRTOS Queue for LCD messages */
 QueueHandle_t Queue_LCD_Request = NULL;
-
+EventGroupHandle_t ECE353_RTOS_Events = NULL;
 /*****************************************************************************/
 /* Function Declarations                                                     */
 /*****************************************************************************/
@@ -53,7 +53,7 @@ void task_sw1(void *pvParameters)
     {
         vTaskDelay(pdMS_TO_TICKS(25));
 
-        bool pressed = (buttons_get_state(BUTTON_SW1) == BUTTON_STATE_HIGH);
+        bool pressed = ((PORT_BUTTON_SW1->IN & MASK_BUTTON_PIN_SW1) == 0);
         TickType_t now = xTaskGetTickCount();
 
         if (pressed && !was_pressed)
@@ -69,7 +69,7 @@ void task_sw1(void *pvParameters)
             lcd_msg_request_t lcd_request;
             lcd_request.msg.command = LCD_CMD_PRINT_SW1_COUNT;
             snprintf(lcd_request.msg.payload.message, 32, "SW1 %lu", (unsigned long)button_count);
-            xQueueSend(Queue_LCD_Request, &lcd_request, 0);
+            xQueueSend(Queue_LCD_Request, &lcd_request, portMAX_DELAY);
             
             reported = true;
         }
@@ -93,7 +93,7 @@ void task_sw2(void *pvParameters)
     {
         vTaskDelay(pdMS_TO_TICKS(25));
 
-        bool pressed = (buttons_get_state(BUTTON_SW2) == BUTTON_STATE_HIGH);
+        bool pressed = (() == 0);
         TickType_t now = xTaskGetTickCount();
 
         if (pressed && !was_pressed)
@@ -109,7 +109,7 @@ void task_sw2(void *pvParameters)
             lcd_msg_request_t lcd_request;
             lcd_request.msg.command = LCD_CMD_PRINT_SW2_COUNT;
             snprintf(lcd_request.msg.payload.message, 32, "SW2 %lu", (unsigned long)button_count);
-            xQueueSend(Queue_LCD_Request, &lcd_request, 0);
+            xQueueSend(Queue_LCD_Request, &lcd_request, portMAX_DELAY);
 
             reported = true;
         }
@@ -150,7 +150,6 @@ void app_init_hw(void)
         for(int i = 0; i < 100000; i++) {}
         CY_ASSERT(0);
     }
-
 }
 
 /*****************************************************************************/
@@ -162,6 +161,11 @@ void app_init_hw(void)
  */
 void app_main(void)
 {
+    Queue_LCD_Request = xQueueCreate(10, sizeof(lcd_msg_request_t));
+    CY_ASSERT(Queue_LCD_Request);
+
+    CY_ASSERT(task_lcd_resources_init(Queue_LCD_Request));
+
     
     /* Register the tasks with FreeRTOS*/
 
