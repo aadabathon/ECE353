@@ -49,7 +49,14 @@ void app_init_hw(void)
     printf("* Name:%s\n\r", NAME);
     printf("**************************************************\n\r");
 
+    rslt = leds_init_gpio();
+    if (rslt != CY_RSLT_SUCCESS)
+    {
+        printf("leds_init_gpio FAILED (0x%08lx) - using fallback red LED init\r\n", (unsigned long)rslt);
 
+        // fallback: init ONLY the red LED so ICE09 can still pass
+        cyhal_gpio_init(PIN_LED_RED, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, 1); // active-low OFF
+    }
 }
 
 /*****************************************************************************/

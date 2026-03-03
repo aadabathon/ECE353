@@ -35,8 +35,8 @@ typedef struct {
 // Global variables used for receiving data
 extern console_buffer_t console_buffer1;
 extern console_buffer_t console_buffer2;
-extern console_buffer_t *produce_console_buffer;
-extern console_buffer_t *consume_console_buffer;
+extern volatile console_buffer_t *produce_console_buffer;
+extern volatile console_buffer_t *consume_console_buffer;
 extern TaskHandle_t TaskHandle_Console_Rx;
 
 // Global variable for transmitting data

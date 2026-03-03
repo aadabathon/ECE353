@@ -14,13 +14,13 @@
  cy_rslt_t leds_init_gpio(void)
 {
     cyhal_gpio_init(PIN_LED_RED,   CYHAL_GPIO_DIR_OUTPUT,
-                    CYHAL_GPIO_DRIVE_STRONG, 1);
+                    CYHAL_GPIO_DRIVE_STRONG, 0);
 
     cyhal_gpio_init(PIN_LED_GREEN, CYHAL_GPIO_DIR_OUTPUT,
-                    CYHAL_GPIO_DRIVE_STRONG, 1);
+                    CYHAL_GPIO_DRIVE_STRONG, 0);
 
     cyhal_gpio_init(PIN_LED_BLUE,  CYHAL_GPIO_DIR_OUTPUT,
-                    CYHAL_GPIO_DRIVE_STRONG, 1);
+                    CYHAL_GPIO_DRIVE_STRONG, 0);
                     
     return CY_RSLT_SUCCESS;
 }

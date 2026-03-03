@@ -27,22 +27,59 @@
 void console_event_handler(void *handler_arg, cyhal_uart_event_t event)
 {
     (void)handler_arg;
+
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     uint8_t c;
 
-    if ((event & CYHAL_UART_IRQ_RX_NOT_EMPTY) == CYHAL_UART_IRQ_RX_NOT_EMPTY)
+    if ((event & CYHAL_UART_IRQ_RX_NOT_EMPTY) == 0)
     {
-        // ADD CODE 
+        return;
     }
-    if ((event & CYHAL_UART_IRQ_TX_EMPTY) == CYHAL_UART_IRQ_TX_EMPTY)
-    {
-        /* ADD CODE */
-    }
-    else
-    {
-    }
-}
 
+    // Drain all available RX chars
+    while (cyhal_uart_getc(&cy_retarget_io_uart_obj, &c, 0) == CY_RSLT_SUCCESS)
+    {
+
+        // Echo back
+        cyhal_uart_putc(&cy_retarget_io_uart_obj, c);
+
+        // Backspace / Delete
+        if ((c == '\b') || (c == 127))
+        {
+            if (produce_console_buffer->index > 0)
+            {
+                produce_console_buffer->index--;
+                produce_console_buffer->data[produce_console_buffer->index] = '\0';
+            }
+        }
+        // Enter
+        else if ((c == '\r') || (c == '\n'))
+        {
+            if (produce_console_buffer->index > 0)
+            {
+                produce_console_buffer->data[produce_console_buffer->index] = '\0';
+
+                volatile console_buffer_t *temp = consume_console_buffer;
+                consume_console_buffer = produce_console_buffer;
+                produce_console_buffer = temp;
+
+                produce_console_buffer->index = 0;
+                produce_console_buffer->data[0] = '\0';
+                vTaskNotifyGiveFromISR(TaskHandle_Console_Rx, &xHigherPriorityTaskWoken);
+            }
+        }
+        // Normal char
+        else
+        {
+            if (produce_console_buffer->index < (CONSOLE_MAX_MESSAGE_LENGTH - 1))
+            {
+                produce_console_buffer->data[produce_console_buffer->index++] = (char)c;
+                produce_console_buffer->data[produce_console_buffer->index] = '\0';
+            }
+        }
+    }
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
 /**
  * @brief
  * This function initializes the console tasks and resources.
