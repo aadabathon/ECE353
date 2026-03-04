@@ -42,6 +42,7 @@ void app_init_hw(void)
     cy_rslt_t rslt;
 
     console_init();
+    cyhal_system_delay_ms(500);
     printf("**************************************************\n\r");
     printf("* %s\n\r", APP_DESCRIPTION);
     printf("* Date: %s\n\r", __DATE__);

@@ -65,6 +65,8 @@ void console_event_handler(void *handler_arg, cyhal_uart_event_t event)
 
                 produce_console_buffer->index = 0;
                 produce_console_buffer->data[0] = '\0';
+                
+                cyhal_gpio_toggle(PIN_LED_RED);
                 vTaskNotifyGiveFromISR(TaskHandle_Console_Rx, &xHigherPriorityTaskWoken);
             }
         }

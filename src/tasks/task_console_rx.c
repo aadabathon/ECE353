@@ -36,7 +36,7 @@ volatile console_buffer_t *produce_console_buffer;
 volatile console_buffer_t *consume_console_buffer;
 
 //Task Handles
-TaskHandle_t TaskHandle_Console_Rx;
+TaskHandle_t TaskHandle_Console_Rx = NULL;
 
 /**
  * @brief
@@ -50,17 +50,23 @@ TaskHandle_t TaskHandle_Console_Rx;
  */
 void task_console_rx(void *param)
 {
+
+
+
     (void)param;
+
+    printf("RX TASK STARTED\r\n");
+
 
     while (1)
     {
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        cyhal_gpio_toggle(PIN_LED_RED);
         
         const char *cmd = (const char *)consume_console_buffer->data;
 
         if (strcmp(cmd, "RED ON") == 0)
         {
-            cyhal_gpio_toggle(PIN_LED_RED);
             cyhal_gpio_write(PIN_LED_RED, 0);   // active-low ON
             task_console_printf("Red LED is ON\r\n");
         }
@@ -113,11 +119,12 @@ bool task_console_resources_init_rx(void)
     rslt = xTaskCreate( //BOTTOM HALF TASK, SEE WEBSITE FOR INFO
         task_console_rx,          // Task function
         "Console Rx Task",       // Name of the task (for debugging)
-        configMINIMAL_STACK_SIZE, // Stack size in words
+        2048, // Stack size in words
         NULL,                    // Task parameter
         tskIDLE_PRIORITY + 1,    // Task priority
         &TaskHandle_Console_Rx   // Task handle
     );
+
     //done
     return (rslt == pdPASS); // Resources initialized successfully
 }
