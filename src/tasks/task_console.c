@@ -24,6 +24,9 @@
  * @param handler_arg 
  * @param event 
  */
+
+ extern circular_buffer_t* console_tx_cb;
+
 void console_event_handler(void *handler_arg, cyhal_uart_event_t event)
 {
     (void)handler_arg;
@@ -33,7 +36,16 @@ void console_event_handler(void *handler_arg, cyhal_uart_event_t event)
 
     if ((event & CYHAL_UART_IRQ_RX_NOT_EMPTY) == 0)
     {
-        return;
+        //If the CB is emmpty, disable TX empty interrupts
+        if (circular_buffer_get_num_bytes(console_tx_cb) == 0)
+        {
+            cyhal_uart_enable_event(&cy_retarget_io_uart_obj, CYHAL_UART_IRQ_TX_EMPTY, CYHAL_ISR_PRIORITY_DEFAULT, false);
+        } else
+        {
+            char next_byte = console_tx_cb->data[console_tx_cb->produce_count++];
+            cyhal_uart_putc(&cy_retarget_io_uart_obj, next_byte);
+        }
+        //if not empty, grab next byte from CB and place into hardware transmit register
     }
 
     // Drain all available RX chars
@@ -66,7 +78,7 @@ void console_event_handler(void *handler_arg, cyhal_uart_event_t event)
                 produce_console_buffer->index = 0;
                 produce_console_buffer->data[0] = '\0';
                 
-                cyhal_gpio_toggle(PIN_LED_RED);
+                //cyhal_gpio_toggle(PIN_LED_RED);   
                 vTaskNotifyGiveFromISR(TaskHandle_Console_Rx, &xHigherPriorityTaskWoken);
             }
         }
@@ -90,34 +102,16 @@ void console_event_handler(void *handler_arg, cyhal_uart_event_t event)
  */
 bool task_console_init(void)
 {
-    /* Register a function for the UART ISR*/
-    cyhal_uart_register_callback(
-        &cy_retarget_io_uart_obj,           // UART object
-        console_event_handler,         // Event handler
-        NULL                       // Handler argument
-    );
+    if (!task_console_resources_init_rx()) return false;
+    if (!task_console_resources_init_tx()) return false;
 
-    /* Initialize UART Rx Resources */
-    if (!task_console_resources_init_rx())
-    {
-        return false; // Initialization failed
-    }
+    cyhal_uart_register_callback(&cy_retarget_io_uart_obj, console_event_handler, NULL);
 
-    /* Initialize UART Tx Resources */
-    if (!task_console_resources_init_tx())
-    {
-        return false; // Initialization failed
-    }
-    else
-    {
-        // Enable UART Rx Interrupts
-        cyhal_uart_enable_event(
-            &cy_retarget_io_uart_obj, 
-            CYHAL_UART_IRQ_RX_NOT_EMPTY, 
-            7, 
-            true);
-    }
-    
-    return true; // Initialization successful
+    cyhal_uart_enable_event(&cy_retarget_io_uart_obj,
+                            CYHAL_UART_IRQ_RX_NOT_EMPTY,
+                            7,
+                            true);
+
+    return true;
 }
 #endif  

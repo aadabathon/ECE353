@@ -8,8 +8,8 @@
  * @copyright Copyright (c) 2025
  * 
  */
-
- #include "task_buttons.h"
+#include "task_console.h"
+#include "task_buttons.h"
 
  #ifdef ECE353_FREERTOS
  /**
@@ -24,29 +24,60 @@
   * @param arg 
   * Unused parameter
   */
- void task_buttons(void *arg)
- {
-    (void)arg; // Unused parameter
+
+TaskHandle_t TaskHandle_Buttons = NULL;
+  
+void debounce_update(debounce_t *d, uint8_t raw, uint8_t threshold, bool *pressed_edge)
+{
+    *pressed_edge = false;
+
+    if (raw == d->last_raw) {
+        if (d->cnt < threshold) d->cnt++;
+    } else {
+        d->last_raw = raw;
+        d->cnt = 1;
+    }
+
+    if (d->cnt >= threshold && d->stable != raw) {
+        uint8_t prev = d->stable;
+        d->stable = raw;
+        if (prev == 1 && raw == 0) *pressed_edge = true;  // active-low edge
+    }
+}
+
+void task_buttons(void *arg)
+{
+    (void)arg;
+
+    const uint8_t TH = 3;
+
+    debounce_t sw1 = { .stable = 1, .last_raw = 1, .cnt = 0 };
+    debounce_t sw2 = { .stable = 1, .last_raw = 1, .cnt = 0 };
+    debounce_t sw3 = { .stable = 1, .last_raw = 1, .cnt = 0 };
 
     while (1)
     {
-        // Monitor button SW1
-        
+        bool edge;
 
-        // Monitor button SW2
+        debounce_update(&sw1, PIN_BUTTON_SW1, TH, &edge);
+        if (edge) task_console_printf("Button SW1 pressed\r\n");
 
+        debounce_update(&sw2, PIN_BUTTON_SW2, TH, &edge);
+        if (edge) task_console_printf("Button SW2 pressed\r\n");
 
-        // Monitor button SW3
-  
+        debounce_update(&sw3, PIN_BUTTON_SW3, TH, &edge);
+        if (edge) task_console_printf("Button SW3 pressed\r\n");
 
-        // Debounce delay
+        vTaskDelay(pdMS_TO_TICKS(15));
     }
- }
+}
 
  /* Button Task Initialization */
-bool task_button_init(void){
+bool task_buttons_init(void){
 
     BaseType_t result;
+
+    buttons_init_gpio();
 
     // Create the button task
     result = xTaskCreate(
@@ -55,7 +86,7 @@ bool task_button_init(void){
         configMINIMAL_STACK_SIZE, 
         NULL, 
         tskIDLE_PRIORITY + 1, 
-        NULL
+        &TaskHandle_Buttons
     );
 
     if(result != pdPASS)

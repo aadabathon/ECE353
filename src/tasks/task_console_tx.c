@@ -14,6 +14,8 @@
 #include "drivers.h"
 #include "task_console.h"
 #include "cyhal_uart.h"
+#include "circular_buffer.h"
+
 /**
  * @brief
  * This file contains the implementation of the console transmit (Tx) task.
@@ -30,6 +32,9 @@
 /* ADD CODE*/
 /* Global Variables */
 
+QueueHandle_t console_tx_queue = NULL; // FreeRTOS queue handle for console Tx
+TaskHandle_t TaskHandle_Console_Tx = NULL;
+circular_buffer_t* console_tx_cb = NULL;
 
 /**
  * @brief 
@@ -43,7 +48,29 @@ void task_console_tx(void *param)
 
     while (1)
     {
-        /* ADD CODE */
+        //WAIT for console buffer messages from the queue
+        xQueueReceive(console_tx_queue, &tx_msg, portMAX_DELAY);
+        //For loop examines each message and adds each byte into the circular buffer
+        for (int i = 0; i < tx_msg.index; i++) 
+            {
+                    // If the circular buffer is full, wait until there is space
+                    while (circular_buffer_get_num_bytes(console_tx_cb) >= console_tx_cb->max_size) 
+                    {
+                        vTaskDelay(pdMS_TO_TICKS(5)); // Delay to prevent busy waiting
+                    }
+            taskENTER_CRITICAL();
+            circular_buffer_add(console_tx_cb, tx_msg.data[i]);
+            taskEXIT_CRITICAL();
+            
+            cyhal_uart_enable_event(&cy_retarget_io_uart_obj, CYHAL_UART_IRQ_TX_EMPTY, CYHAL_ISR_PRIORITY_DEFAULT, true);
+
+        }
+        vPortFree(tx_msg.data);
+            // once not full, add next byte, to the CB
+
+            //enable the transmit empty interrupts, so the ISR can send the data from the CB to the UART
+
+        //Free the data that was sent frm the CB
     }
 }
 
@@ -58,8 +85,26 @@ bool task_console_resources_init_tx(void)
 {
     BaseType_t rslt = pdPASS;
 
-    /* ADD CODE */
-
+    //Init the console Tx FreeRTOS
+    console_tx_queue = xQueueCreate(10, sizeof(console_buffer_t));
+    if (console_tx_queue == NULL)
+    {
+        return false; // Queue creation failed
+    }
+    //init the circular buffer for the console Tx
+    console_tx_cb = circular_buffer_init(128);
+    if (console_tx_cb == NULL)
+    {
+        return false; // Circular buffer initialization failed
+    }
+    //create the freertos task
+    rslt = xTaskCreate(task_console_tx,
+                       "Console Tx",
+                       configMINIMAL_STACK_SIZE,
+                       NULL,
+                       7,
+                       &TaskHandle_Console_Tx);
+    
     if (rslt != pdPASS)
     {
         return false; // Initialization failed
@@ -90,6 +135,7 @@ void task_console_printf(char *str_ptr, ...)
 
     /* ADD CODE */
     /* Allocate the message buffer */
+    message_buffer = (char *) pvPortMalloc(CONSOLE_MAX_MESSAGE_LENGTH * sizeof(char));
 
     if (message_buffer)
     {
@@ -105,9 +151,12 @@ void task_console_printf(char *str_ptr, ...)
 
         /* ADD CODE */
         /* Initialize the console buffer */
-
+        console_buffer.data = message_buffer;
+        console_buffer.index = (uint32_t)strlen(message_buffer);
         /* ADD CODE */
         /* The receiver task is responsible to free the memory from here on */
+        xQueueSend(console_tx_queue, &console_buffer, portMAX_DELAY);
+
 
     }
     else

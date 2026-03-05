@@ -50,21 +50,16 @@ TaskHandle_t TaskHandle_Console_Rx = NULL;
  */
 void task_console_rx(void *param)
 {
-
-
-
     (void)param;
-
-    printf("RX TASK STARTED\r\n");
-
 
     while (1)
     {
-        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-        cyhal_gpio_toggle(PIN_LED_RED);
-        
-        const char *cmd = (const char *)consume_console_buffer->data;
 
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
+        cyhal_gpio_toggle(PIN_LED_RED);   // proof task woke
+
+        const char *cmd = (const char *)consume_console_buffer->data;
         if (strcmp(cmd, "RED ON") == 0)
         {
             cyhal_gpio_write(PIN_LED_RED, 0);   // active-low ON
@@ -100,13 +95,15 @@ bool task_console_resources_init_rx(void)
     console_buffer1.data = (char *)pvPortMalloc(CONSOLE_MAX_MESSAGE_LENGTH * sizeof(char));
     console_buffer2.data = (char *)pvPortMalloc(CONSOLE_MAX_MESSAGE_LENGTH * sizeof(char));
 
+    memset(console_buffer1.data, 0, CONSOLE_MAX_MESSAGE_LENGTH);
+    memset(console_buffer2.data, 0, CONSOLE_MAX_MESSAGE_LENGTH);
+    console_buffer1.index = 0;
+    console_buffer2.index = 0;
+
     if ((console_buffer1.data == NULL) || (console_buffer2.data == NULL))
     {
         return false;
     }
-
-    memset(console_buffer1.data, 0, CONSOLE_MAX_MESSAGE_LENGTH);
-    memset(console_buffer2.data, 0, CONSOLE_MAX_MESSAGE_LENGTH);
     
     produce_console_buffer = &console_buffer1;
     consume_console_buffer = &console_buffer2;
@@ -124,7 +121,6 @@ bool task_console_resources_init_rx(void)
         tskIDLE_PRIORITY + 1,    // Task priority
         &TaskHandle_Console_Rx   // Task handle
     );
-
     //done
     return (rslt == pdPASS); // Resources initialized successfully
 }
