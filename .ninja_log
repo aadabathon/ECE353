@@ -736,3 +736,12 @@
 637	947	7947779057315302	build/ece353/Debug/mtb-example-ce240786-empty-app.elf	84b3a0d41894d1a3
 75	634	7947780921390366	C:/Users/adams/ECE353-Stuff/ece353-s26-ashebani/build/Debug/local/src/homework/hw02/hw02.o	af9d4dc07377dfda
 635	931	7947780926990184	build/ece353/Debug/mtb-example-ce240786-empty-app.elf	84b3a0d41894d1a3
+79	718	7947788889722417	C:/Users/adams/ECE353-Stuff/ece353-s26-ashebani/build/Debug/local/src/homework/hw02/hw02.o	af9d4dc07377dfda
+719	1155	7947788896193220	build/ece353/Debug/mtb-example-ce240786-empty-app.elf	84b3a0d41894d1a3
+96	666	7947790404621429	C:/Users/adams/ECE353-Stuff/ece353-s26-ashebani/build/Debug/local/src/tasks/task_buttons.o	181573ffcadab7a1
+86	702	7947790404525167	C:/Users/adams/ECE353-Stuff/ece353-s26-ashebani/build/Debug/local/src/homework/hw02/hw02.o	af9d4dc07377dfda
+702	1095	7947790410663398	build/ece353/Debug/mtb-example-ce240786-empty-app.elf	84b3a0d41894d1a3
+80	717	7947792147172750	C:/Users/adams/ECE353-Stuff/ece353-s26-ashebani/build/Debug/local/src/tasks/task_joystick.o	aa64ac58ab0dae6e
+718	1156	7947792153543994	build/ece353/Debug/mtb-example-ce240786-empty-app.elf	84b3a0d41894d1a3
+72	515	7947793269538017	C:/Users/adams/ECE353-Stuff/ece353-s26-ashebani/build/Debug/local/src/tasks/task_lcd.o	26c09535fad32751
+516	901	7947793274079223	build/ece353/Debug/mtb-example-ce240786-empty-app.elf	84b3a0d41894d1a3
