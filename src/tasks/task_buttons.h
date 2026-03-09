@@ -17,6 +17,11 @@
 
  #include "drivers.h"
  #include "rtos_events.h"
+
+#define EVENT_SW1          (1 << 1)
+#define EVENT_SW2          (1 << 2) //Note switch 2 and 3 are not used in HW02
+#define EVENT_SW3          (1 << 3)
+
 typedef struct {
     uint8_t stable;
     uint8_t last_raw;

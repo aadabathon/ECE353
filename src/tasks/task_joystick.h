@@ -15,6 +15,8 @@
 #include "rtos_events.h"
 #include <complex.h>
 
+#define EVENT_JOYSTICK     (1 << 0) //Event for joystick position change, used in ECE353_RTOS_Events event group.
+
 #ifdef ECE353_FREERTOS
 extern QueueHandle_t Queue_Joystick;
 

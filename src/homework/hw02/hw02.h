@@ -21,9 +21,15 @@
 #include "task_buttons.h"
 #include "task_joystick.h"
 #include "devices.h"
+#include "master_mind_lib.h"
 
 #define  TASK_SYSTEM_CONTROL_STACK_SIZE    (configMINIMAL_STACK_SIZE*5)
 #define  TASK_SYSTEM_CONTROL_PRIORITY      (tskIDLE_PRIORITY + 1U)  
+
+#define EVENT_JOYSTICK     (1 << 0) //Event bitmasks for ECE_HW02_Events event group.
+#define EVENT_SW1          (1 << 1)
+#define EVENT_SW2          (1 << 2) //Note switch 2 and 3 are not used in HW02
+#define EVENT_SW3          (1 << 3)
 
 /*****************************************************************************/
 /* Function Definitions                                                      */

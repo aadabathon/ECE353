@@ -50,10 +50,11 @@ void task_joystick(void *arg)
         {
             // Queue length is 1 → overwrite is perfect 
             xQueueOverwrite(Queue_Joystick, &cur);
+            xEventGroupSetBits(ECE353_RTOS_Events, EVENT_JOYSTICK);
             prev = cur;
         }
 
-        vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(500));
+        vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(25)); // Poll every 25 ms
     }
 }
 

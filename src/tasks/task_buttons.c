@@ -49,24 +49,20 @@ void task_buttons(void *arg)
 {
     (void)arg;
 
-    const uint8_t TH = 3;
+    const uint8_t TH = 2; // 2 consecutive samples = 30 ms (since we sample every 15 ms)
 
     debounce_t sw1 = { .stable = 1, .last_raw = 1, .cnt = 0 };
-    debounce_t sw2 = { .stable = 1, .last_raw = 1, .cnt = 0 };
-    debounce_t sw3 = { .stable = 1, .last_raw = 1, .cnt = 0 };
+    //debounce_t sw2 = { .stable = 1, .last_raw = 1, .cnt = 0 };
+    //debounce_t sw3 = { .stable = 1, .last_raw = 1, .cnt = 0 };
 
     while (1)
     {
-        bool edge;
+        bool edge_sw1;
 
-        debounce_update(&sw1, PIN_BUTTON_SW1, TH, &edge);
-        if (edge) task_console_printf("Button SW1 pressed\r\n");
-
-        debounce_update(&sw2, PIN_BUTTON_SW2, TH, &edge);
-        if (edge) task_console_printf("Button SW2 pressed\r\n");
-
-        debounce_update(&sw3, PIN_BUTTON_SW3, TH, &edge);
-        if (edge) task_console_printf("Button SW3 pressed\r\n");
+        debounce_update(&sw1, PIN_BUTTON_SW1, TH, &edge_sw1);
+        if (edge_sw1) {
+            xEventGroupSetBits(ECE353_RTOS_Events, EVENT_SW1);
+        }
 
         vTaskDelay(pdMS_TO_TICKS(15));
     }
