@@ -51,8 +51,8 @@ static void draw_cipher_tile(uint8_t col, uint8_t value, bool active)
     msg.payload.tile.row = LCD_TILE_ROW_CYPHER;
     msg.payload.tile.col = col;
     msg.payload.tile.number = value;
-    msg.payload.tile.color_fg = LCD_COLOR_RED;
-    msg.payload.tile.color_bg = LCD_COLOR_BLACK;
+    msg.payload.tile.color_fg = LCD_COLOR_BLACK;
+    msg.payload.tile.color_bg = LCD_COLOR_RED;
 
     xQueueSend(Queue_LCD, &msg, portMAX_DELAY);
 }
@@ -81,8 +81,8 @@ void task_hw02_system_control(void *pvParameters)
     master_mind_handle_msg(&msg);
 
 
-    /* Draw 4 blank tiles for the secret code */
-    for(int col = 0; col < 4; col++)
+    /* Draw 3 blank tiles for the secret code */
+    for(int col = 1; col < 4; col++)
     {
         msg.command = LCD_CMD_DRAW_TILE;
         msg.payload.tile.row = LCD_TILE_ROW_CYPHER;
@@ -92,17 +92,33 @@ void task_hw02_system_control(void *pvParameters)
         msg.payload.tile.color_bg = LCD_COLOR_BLACK;
         master_mind_handle_msg(&msg);
     }
+        /*Draw the 0 start column. and the cipher start column*/
+        msg.command = LCD_CMD_DRAW_TILE;
+        msg.payload.tile.row = LCD_TILE_ROW_CYPHER;
+        msg.payload.tile.col = 0;
+        msg.payload.tile.number = 0; // number is ignored for code tiles
+        msg.payload.tile.color_fg = LCD_COLOR_BLACK;
+        msg.payload.tile.color_bg = LCD_COLOR_RED;
+        master_mind_handle_msg(&msg);
 
+        msg.command = LCD_CMD_DRAW_TILE_INVERTED;
+        msg.payload.tile.row = LCD_TILE_ROW_NUM_0_3;
+        msg.payload.tile.col = 0;
+        msg.payload.tile.number = 0;
+        msg.payload.tile.color_fg = LCD_COLOR_GREEN;
+        msg.payload.tile.color_bg = LCD_COLOR_BLACK;
 
-    /* Draw numbers 0-3 for the user input*/
-    for(int col = 0; col < 4; col++)
+        master_mind_handle_msg(&msg);
+
+    /* Draw numbers 1-3 for the user input*/
+    for(int col = 1; col < 4; col++)
     {
         msg.command = LCD_CMD_DRAW_TILE_INVERTED;
         msg.payload.tile.row = LCD_TILE_ROW_NUM_0_3;
         msg.payload.tile.col = col;
         msg.payload.tile.number = col;
-        msg.payload.tile.color_fg = LCD_COLOR_GREEN;
-        msg.payload.tile.color_bg = LCD_COLOR_BLACK;
+        msg.payload.tile.color_fg = LCD_COLOR_BLACK;
+        msg.payload.tile.color_bg = LCD_COLOR_GREEN;
 
         master_mind_handle_msg(&msg);
     }
@@ -114,8 +130,8 @@ void task_hw02_system_control(void *pvParameters)
         msg.payload.tile.row = LCD_TILE_ROW_NUM_4_7;
         msg.payload.tile.col = col;
         msg.payload.tile.number = col + 4;
-        msg.payload.tile.color_fg = LCD_COLOR_GREEN;
-        msg.payload.tile.color_bg = LCD_COLOR_BLACK;
+        msg.payload.tile.color_fg = LCD_COLOR_BLACK;
+        msg.payload.tile.color_bg = LCD_COLOR_GREEN;
         master_mind_handle_msg(&msg);
     }
 
@@ -130,6 +146,8 @@ void task_hw02_system_control(void *pvParameters)
                 pdFALSE,
                 portMAX_DELAY
             );
+
+            printf("System woke: 0x%08lx\r\n", HW02_Events_Bits);
 
             if (HW02_Events_Bits & EVENT_JOYSTICK)
             {
@@ -168,8 +186,8 @@ void task_hw02_system_control(void *pvParameters)
 
                     if (active_input_num != old_input_num)
                     {
-                        draw_input_tile(old_input_num, false);
-                        draw_input_tile(active_input_num, true);
+                        draw_input_tile(old_input_num, true);
+                        draw_input_tile(active_input_num, false);
                     }
 
                     joystick_centered = false;
@@ -208,7 +226,7 @@ void app_init_hw(void)
 
     console_init();
     // Set text color to black
-    printf("\x1b[30m");
+    printf("\x1b[0m");
     printf("\x1b[2J\x1b[;H");
     printf("**************************************************\n\r");
     printf("* %s\n\r", APP_DESCRIPTION);
@@ -230,7 +248,6 @@ void app_init_hw(void)
 
     /* Initialize the buttons*/
     buttons_init_gpio();
-
 }
 
 /*****************************************************************************/

@@ -79,18 +79,18 @@ cy_rslt_t joystick_init(void)
  *
  * @param - None
  */
-uint16_t  joystick_read_x(void)
+uint16_t joystick_read_x(void)
 {
-    return cyhal_adc_read(&joystick_adc_chan_x_obj);
+    return cyhal_adc_read_u16(&joystick_adc_chan_x_obj);
 }
-
 /** Read Y direction of Joystick 
  *
  * @param - None
  */
-uint16_t  joystick_read_y(void)
+
+uint16_t joystick_read_y(void)
 {
-    return cyhal_adc_read(&joystick_adc_chan_y_obj);
+    return cyhal_adc_read_u16(&joystick_adc_chan_y_obj);
 }
 
 
@@ -104,8 +104,8 @@ joystick_position_t joystick_get_pos(void)
     uint16_t x_val = joystick_read_x();
     uint16_t y_val = joystick_read_y();
 
-    bool x_high = x_val > JOYSTICK_THRESH_X_RIGHT;
-    bool x_low = x_val < JOYSTICK_THRESH_X_LEFT;
+    bool x_high = x_val < JOYSTICK_THRESH_X_RIGHT;
+    bool x_low = x_val > JOYSTICK_THRESH_X_LEFT;
     bool y_high = y_val > JOYSTICK_THRESH_Y_UP;
     bool y_low = y_val < JOYSTICK_THRESH_Y_DOWN;
 

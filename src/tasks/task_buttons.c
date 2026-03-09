@@ -26,6 +26,7 @@
   */
 
 TaskHandle_t TaskHandle_Buttons = NULL;
+extern EventGroupHandle_t ECE353_RTOS_Events;
   
 void debounce_update(debounce_t *d, uint8_t raw, uint8_t threshold, bool *pressed_edge)
 {
@@ -59,9 +60,11 @@ void task_buttons(void *arg)
     {
         bool edge_sw1;
 
-        debounce_update(&sw1, PIN_BUTTON_SW1, TH, &edge_sw1);
+        debounce_update(&sw1, cyhal_gpio_read(PIN_BUTTON_SW1), TH, &edge_sw1);
+
         if (edge_sw1) {
             xEventGroupSetBits(ECE353_RTOS_Events, EVENT_SW1);
+            printf("SW1 Pressed!\r\n");
         }
 
         vTaskDelay(pdMS_TO_TICKS(15));

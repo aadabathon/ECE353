@@ -16,6 +16,7 @@
  #include "task_joystick.h"
 
 QueueHandle_t Queue_Joystick = NULL;
+extern EventGroupHandle_t ECE353_RTOS_Events;
 
 /* Message lookup table for joystick positions */
 const char * const joystick_pos_names[] = {
@@ -51,6 +52,7 @@ void task_joystick(void *arg)
             // Queue length is 1 → overwrite is perfect 
             xQueueOverwrite(Queue_Joystick, &cur);
             xEventGroupSetBits(ECE353_RTOS_Events, EVENT_JOYSTICK);
+            printf("Joystick Position: %s\r\n", joystick_pos_names[cur]);
             prev = cur;
         }
 
